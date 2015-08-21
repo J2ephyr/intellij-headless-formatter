@@ -7,6 +7,7 @@ import com.intellij.idea.IdeaApplication;
 import com.intellij.idea.Main;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ApplicationStarter;
+import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.application.ex.ApplicationManagerEx;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.module.Module;
@@ -14,7 +15,6 @@ import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.util.PlatformUtils;
-import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.lang.reflect.InvocationTargetException;
@@ -25,9 +25,9 @@ public class CodeFormatApplication extends IdeaApplication {
         super(args);
     }
 
-    @NotNull
     @Override
     public ApplicationStarter getStarter() {
+
         return new ApplicationStarter() {
             @Override
             public String getCommandName() {
@@ -49,7 +49,7 @@ public class CodeFormatApplication extends IdeaApplication {
     private static void doCodeFormat()
     {
         System.out.println("Starting code format.");
-        final String projectPath = "/Users/marcosscriven/development/sources/atlassian-annotations/";
+        final String projectPath = "/Users/marcosscriven/development/sources/atlassian-annotations/pom.xml";
 
         ApplicationManagerEx.getApplicationEx().doNotSave(false);
         final Project project = ProjectUtil.openOrImport(projectPath, null, false);
@@ -61,6 +61,8 @@ public class CodeFormatApplication extends IdeaApplication {
         });
 
         final Module[] modules = ModuleManager.getInstance(project).getModules();
+
+        // TODO Need to work out which module is the parent
         final ReformatCodeProcessor processor = new ReformatCodeProcessor(project, modules[2], false);
         final OptimizeImportsProcessor optimizeImportsProcessor = new OptimizeImportsProcessor(processor);
         optimizeImportsProcessor.run();
@@ -75,6 +77,7 @@ public class CodeFormatApplication extends IdeaApplication {
         System.setProperty(PlatformUtils.PLATFORM_PREFIX_KEY, PlatformUtils.getPlatformPrefix(PlatformUtils.IDEA_CE_PREFIX));
         System.setProperty("java.awt.headless", "true");
         System.setProperty("idea.is.unit.test", "true");
+        System.setProperty(PathManager.PROPERTY_PLUGINS_PATH, "/tmp/plug");
         Main.setFlags(emptyArgs);
 
         final CodeFormatApplication app = new CodeFormatApplication(emptyArgs);
