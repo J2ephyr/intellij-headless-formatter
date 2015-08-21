@@ -66,6 +66,7 @@ public class CodeFormatApplication extends IdeaApplication {
         optimizeImportsProcessor.run();
         FileDocumentManager.getInstance().saveAllDocuments();
         System.out.println("Finished code format.");
+        System.exit(0);
     }
 
     public static void main(String[] args) throws InvocationTargetException, InterruptedException {
