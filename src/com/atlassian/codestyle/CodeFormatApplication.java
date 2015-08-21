@@ -12,7 +12,9 @@ import com.intellij.openapi.application.ex.ApplicationManagerEx;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
+import com.intellij.openapi.module.impl.ModuleImpl;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.impl.ProjectImpl;
 import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.util.PlatformUtils;
 
@@ -61,11 +63,13 @@ public class CodeFormatApplication extends IdeaApplication {
         });
 
         final Module[] modules = ModuleManager.getInstance(project).getModules();
+        for (int i = 0; i < modules.length; i++) {
+            Module module = modules[i];
+            final ReformatCodeProcessor processor = new ReformatCodeProcessor(project, module, false);
+            final OptimizeImportsProcessor optimizeImportsProcessor = new OptimizeImportsProcessor(processor);
+            optimizeImportsProcessor.run();
+        }
 
-        // TODO Need to work out which module is the parent
-        final ReformatCodeProcessor processor = new ReformatCodeProcessor(project, modules[2], false);
-        final OptimizeImportsProcessor optimizeImportsProcessor = new OptimizeImportsProcessor(processor);
-        optimizeImportsProcessor.run();
         FileDocumentManager.getInstance().saveAllDocuments();
         System.out.println("Finished code format.");
         System.exit(0);
