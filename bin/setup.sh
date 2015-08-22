@@ -18,10 +18,16 @@ else
     echo "Already unarchived IntelliJ"
 fi
 
+if [ ! -d plugins ] ; then
+    echo "Linking Maven and Properties plugins"
+    mkdir plugins
+    ln -s ../idea/plugins/maven plugins/maven
+    ln -s ../idea/plugins/properties plugins/properties
+else
+    echo "Already linked Maven and Properties plugins"
+fi
+
 # xattr -d com.apple.quarantine *
 
 echo "Compiling..."
 javac -classpath "idea/lib/*"  ../src/com/atlassian/codestyle/CodeFormatApplication.java -d .
-
-# Run with:
-# java -classpath ".:idea/lib/*:idea/plugins/maven/lib/*:idea/plugins/properties/lib/*" com.atlassian.codestyle.CodeFormatApplication

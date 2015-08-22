@@ -47,7 +47,7 @@ public class CodeFormatApplication extends IdeaApplication {
 
     private static void doCodeFormat(final String projectPomPath)
     {
-        System.out.println("Starting code format.");
+        System.out.println("Starting code format with pom.xml:" + projectPomPath);
         final Project project = ProjectUtil.openOrImport(projectPomPath, null, false);
         ApplicationManager.getApplication().runWriteAction(new Runnable() {
             @Override
@@ -77,7 +77,11 @@ public class CodeFormatApplication extends IdeaApplication {
         System.setProperty(PlatformUtils.PLATFORM_PREFIX_KEY, PlatformUtils.getPlatformPrefix(PlatformUtils.IDEA_CE_PREFIX));
         System.setProperty("java.awt.headless", "true");
         System.setProperty("idea.is.unit.test", "true");
-        System.setProperty(PathManager.PROPERTY_PLUGINS_PATH, "/tmp/plug");
+
+        final String pluginsPath = System.getProperty("user.dir") + "/build/plugins";
+        System.out.println("Plugins loaded from path:" + pluginsPath);
+        System.out.println(System.getProperty("java.home"));
+        System.setProperty(PathManager.PROPERTY_PLUGINS_PATH, pluginsPath);
         Main.setFlags(null);
 
         final CodeFormatApplication app = new CodeFormatApplication(args);
