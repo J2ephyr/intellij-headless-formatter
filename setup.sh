@@ -1,4 +1,27 @@
 #! /bin/bash
 
-wget https://d1opms6zj7jotq.cloudfront.net/idea/ideaIC-14.1.4.tar.gz
-xattr -d com.apple.quarantine *
+mkdir -p build
+cd build
+
+if [ ! -f idea.tar.gz ]; then
+    echo "Downloading IntelliJ"
+    wget https://d1opms6zj7jotq.cloudfront.net/idea/ideaIC-142.4083.2.tar.gz -O idea.tar.gz
+else
+    echo "Already downloaded IntelliJ"
+fi
+
+if [ ! -d idea ] ; then
+    echo "Unarchiving IntelliJ"
+    mkdir idea
+    tar xvzf idea.tar.gz -C idea --strip-components=1
+else
+    echo "Already unarchived IntelliJ"
+fi
+
+# xattr -d com.apple.quarantine *
+
+echo "Compiling..."
+javac -classpath "idea/lib/*"  ../src/com/atlassian/codestyle/CodeFormatApplication.java -d .
+
+# Run with:
+# java -classpath ".:idea/lib/*:idea/plugins/maven/lib/*:idea/plugins/properties/lib/*" com.atlassian.codestyle.CodeFormatApplication
