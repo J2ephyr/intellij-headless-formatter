@@ -53,7 +53,6 @@ public class CodeFormatApplication extends IdeaApplication {
         System.out.println("Starting code format.");
         final String projectPath = "/Users/marcosscriven/development/sources/atlassian-annotations/pom.xml";
 
-        ApplicationManagerEx.getApplicationEx().doNotSave(false);
         final Project project = ProjectUtil.openOrImport(projectPath, null, false);
         ApplicationManager.getApplication().runWriteAction(new Runnable() {
             @Override
@@ -72,6 +71,9 @@ public class CodeFormatApplication extends IdeaApplication {
 
         FileDocumentManager.getInstance().saveAllDocuments();
         System.out.println("Finished code format.");
+
+        // This should work, but still seems to ask for confirmation which doesn't work in a headless environment
+        // ApplicationManagerEx.getApplicationEx().exit(true, false);
         System.exit(0);
     }
 
