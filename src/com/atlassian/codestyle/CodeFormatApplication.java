@@ -57,8 +57,8 @@ public class CodeFormatApplication extends IdeaApplication {
         });
 
         final Module[] modules = ModuleManager.getInstance(project).getModules();
-        for (int i = 0; i < modules.length; i++) {
-            Module module = modules[i];
+        for (Module module : modules) {
+            System.out.println("Reformatting code for module: " + module.getName());
             final ReformatCodeProcessor processor = new ReformatCodeProcessor(project, module, false);
             final OptimizeImportsProcessor optimizeImportsProcessor = new OptimizeImportsProcessor(processor);
             optimizeImportsProcessor.run();
@@ -78,10 +78,8 @@ public class CodeFormatApplication extends IdeaApplication {
         System.setProperty("java.awt.headless", "true");
         System.setProperty("idea.is.unit.test", "true");
 
-        final String pluginsPath = System.getProperty("user.dir") + "/build/plugins";
+        final String pluginsPath = System.getProperty(PathManager.PROPERTY_PLUGINS_PATH) ;
         System.out.println("Plugins loaded from path:" + pluginsPath);
-        System.out.println(System.getProperty("java.home"));
-        System.setProperty(PathManager.PROPERTY_PLUGINS_PATH, pluginsPath);
         Main.setFlags(null);
 
         final CodeFormatApplication app = new CodeFormatApplication(args);
