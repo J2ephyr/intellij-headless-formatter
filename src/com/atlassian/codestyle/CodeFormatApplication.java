@@ -8,13 +8,10 @@ import com.intellij.idea.Main;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ApplicationStarter;
 import com.intellij.openapi.application.PathManager;
-import com.intellij.openapi.application.ex.ApplicationManagerEx;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
-import com.intellij.openapi.module.impl.ModuleImpl;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.impl.ProjectImpl;
 import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.util.PlatformUtils;
 
@@ -43,17 +40,15 @@ public class CodeFormatApplication extends IdeaApplication {
 
             @Override
             public void main(String[] args) {
-                doCodeFormat();
+                doCodeFormat(args[0]);
             }
         };
     }
 
-    private static void doCodeFormat()
+    private static void doCodeFormat(final String projectPomPath)
     {
         System.out.println("Starting code format.");
-        final String projectPath = "/Users/marcosscriven/development/sources/atlassian-annotations/pom.xml";
-
-        final Project project = ProjectUtil.openOrImport(projectPath, null, false);
+        final Project project = ProjectUtil.openOrImport(projectPomPath, null, false);
         ApplicationManager.getApplication().runWriteAction(new Runnable() {
             @Override
             public void run() {
@@ -79,14 +74,13 @@ public class CodeFormatApplication extends IdeaApplication {
 
     public static void main(String[] args) throws InvocationTargetException, InterruptedException {
 
-        final String[] emptyArgs = new String[] {};
         System.setProperty(PlatformUtils.PLATFORM_PREFIX_KEY, PlatformUtils.getPlatformPrefix(PlatformUtils.IDEA_CE_PREFIX));
         System.setProperty("java.awt.headless", "true");
         System.setProperty("idea.is.unit.test", "true");
         System.setProperty(PathManager.PROPERTY_PLUGINS_PATH, "/tmp/plug");
-        Main.setFlags(emptyArgs);
+        Main.setFlags(null);
 
-        final CodeFormatApplication app = new CodeFormatApplication(emptyArgs);
+        final CodeFormatApplication app = new CodeFormatApplication(args);
 
         SwingUtilities.invokeLater(new Runnable() {
             @Override
