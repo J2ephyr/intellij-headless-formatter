@@ -1,6 +1,7 @@
 package com.atlassian.codestyle;
 
 import com.intellij.codeInsight.actions.OptimizeImportsProcessor;
+import com.intellij.codeInsight.actions.ReformatCodeAction;
 import com.intellij.codeInsight.actions.ReformatCodeProcessor;
 import com.intellij.ide.impl.ProjectUtil;
 import com.intellij.idea.IdeaApplication;
@@ -13,6 +14,7 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFileManager;
+import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
 import com.intellij.util.PlatformUtils;
 
 import javax.swing.*;
@@ -57,11 +59,17 @@ public class CodeFormatApplication extends IdeaApplication {
                 }
             });
 
+            CodeStyleSettingsManager.getInstance().getCurrentSettings().CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND=Integer.MAX_VALUE;
+            CodeStyleSettingsManager.getInstance().getCurrentSettings().NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND=Integer.MAX_VALUE;
+
             final Module[] modules = ModuleManager.getInstance(project).getModules();
             for (Module module : modules) {
                 System.out.println("Reformatting code for module: " + module.getName());
                 final ReformatCodeProcessor processor = new ReformatCodeProcessor(project, module, false);
                 final OptimizeImportsProcessor optimizeImportsProcessor = new OptimizeImportsProcessor(processor);
+
+                // Reformat only Java classes
+                ReformatCodeAction.registerFileMaskFilter(optimizeImportsProcessor, "*.java");
                 optimizeImportsProcessor.run();
             }
 
