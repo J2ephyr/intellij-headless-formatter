@@ -1,6 +1,6 @@
 #! /bin/bash
 
-PLAN_TEMPLATES_DIR="/Users/marcosscriven/development/sources/java-platform-plan-templates"
+PLAN_TEMPLATES_DIR=$1
 EXTRACT="$PLAN_TEMPLATES_DIR/bin/expand.sh"
 PLAN_CACHE="/tmp/plancache"
 OUTPUT="/tmp/branches.json"
@@ -9,7 +9,7 @@ rm $OUTPUT
 mkdir -p $PLAN_CACHE
 
 echo '{ "modules": [' >> $OUTPUT
-cut -d, -f1 armata-modules.txt |
+cut -d, -f1 data/armata-modules.txt |
 while read module; do
    template_file="$PLAN_TEMPLATES_DIR/templates/$module.groovy";
    if [ -f $template_file ]; then
