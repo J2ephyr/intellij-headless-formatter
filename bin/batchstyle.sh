@@ -50,7 +50,9 @@ do
 
         # Check it worked, and if not log the problem and continue
         if [[ $? != 0 ]]; then
-            echo "Failed to format code for module: $module on branch: $branch"
+            echo "\e[31m*******************************************************************************************"
+            echo "\e[31mFailed to format code for module: $module on branch: $branch"
+            echo "\e[31m*******************************************************************************************"
             continue
         fi
 
