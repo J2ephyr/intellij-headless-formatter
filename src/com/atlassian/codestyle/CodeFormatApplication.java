@@ -47,29 +47,36 @@ public class CodeFormatApplication extends IdeaApplication {
 
     private static void doCodeFormat(final String projectPomPath)
     {
-        System.out.println("Starting code format with pom.xml:" + projectPomPath);
-        final Project project = ProjectUtil.openOrImport(projectPomPath, null, false);
-        ApplicationManager.getApplication().runWriteAction(new Runnable() {
-            @Override
-            public void run() {
-                VirtualFileManager.getInstance().refreshWithoutFileWatcher(false);
+        try {
+            System.out.println("Starting code format with pom.xml:" + projectPomPath);
+            final Project project = ProjectUtil.openOrImport(projectPomPath, null, false);
+            ApplicationManager.getApplication().runWriteAction(new Runnable() {
+                @Override
+                public void run() {
+                    VirtualFileManager.getInstance().refreshWithoutFileWatcher(false);
+                }
+            });
+
+            final Module[] modules = ModuleManager.getInstance(project).getModules();
+            for (Module module : modules) {
+                System.out.println("Reformatting code for module: " + module.getName());
+                final ReformatCodeProcessor processor = new ReformatCodeProcessor(project, module, false);
+                final OptimizeImportsProcessor optimizeImportsProcessor = new OptimizeImportsProcessor(processor);
+                optimizeImportsProcessor.run();
             }
-        });
 
-        final Module[] modules = ModuleManager.getInstance(project).getModules();
-        for (Module module : modules) {
-            System.out.println("Reformatting code for module: " + module.getName());
-            final ReformatCodeProcessor processor = new ReformatCodeProcessor(project, module, false);
-            final OptimizeImportsProcessor optimizeImportsProcessor = new OptimizeImportsProcessor(processor);
-            optimizeImportsProcessor.run();
+            FileDocumentManager.getInstance().saveAllDocuments();
+            System.out.println("Finished code format.");
+
+            // This should work, but still seems to ask for confirmation which doesn't work in a headless environment
+            // ApplicationManagerEx.getApplicationEx().exit(true, false);
+            System.exit(0);
         }
-
-        FileDocumentManager.getInstance().saveAllDocuments();
-        System.out.println("Finished code format.");
-
-        // This should work, but still seems to ask for confirmation which doesn't work in a headless environment
-        // ApplicationManagerEx.getApplicationEx().exit(true, false);
-        System.exit(0);
+        catch (Exception e) {
+            // If for any reason we fail, we want to be able to carry on
+            System.out.println("Failed to run code format job:" + e);
+            System.exit(1);
+        }
     }
 
     public static void main(String[] args) throws InvocationTargetException, InterruptedException {

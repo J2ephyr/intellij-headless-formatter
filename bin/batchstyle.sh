@@ -2,6 +2,9 @@
 
 echo "Batch processing Armata platform modules."
 
+mkdir -p working
+cd working
+
 while read line
 do
     module=`echo $line | cut -d, -f1`
@@ -9,7 +12,7 @@ do
     echo "Processing module: $module with repo: $repo"
 
     # Fetch the branches
-    cat data/platform-module-branches.json |  jq '.modules[] | select(.name=="'$module'") | .branches| join(",")' | tr -d '"' | tr ',' '\n' | while read branch
+    cat ../data/platform-module-branches.json |  jq '.modules[] | select(.name=="'$module'") | .branches| join(",")' | tr -d '"' | tr ',' '\n' | while read branch
     do
         # Remove everything before the last hyphen
         version=${branch##*-![0-9]}
@@ -32,5 +35,27 @@ do
         issueBranch=$issueBranch/PLATFORM-159-code-reformat-`date +%s`
 
         echo "Processing branch: $branch on issue branch: $issueBranch"
+
+        if [ ! -d $module/.git ]; then
+            git clone $repo $module
+        fi
+
+        git -C $module checkout $branch
+        git -C $module pull
+        git -C $module reset --hard
+        git -C $module clean -dxf
+        git -C $module checkout -b $issueBranch
+
+        ../bin/codestyle.sh $module
+
+        # Check it worked, and if not log the problem and continue
+        if [[ $? != 0 ]]; then
+            echo "Failed to format code for module: $module on branch: $branch"
+            continue
+        fi
+
+        git -C $module add .
+        git -C $module commit --author="codeformatter <>" -m "PLATFORM-159: Code formatting only"
+
     done
-done<data/armata-modules.txt
+done<../data/armata-modules.txt
