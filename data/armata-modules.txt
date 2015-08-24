@@ -8,7 +8,7 @@ atlassian-gadgets,git@bitbucket.org:atlassian/atlassian-gadgets.git
 atlassian-healthcheck,git@bitbucket.org:atlassian/atlassian-healthcheck.git
 atlassian-landlord-plugin,git@bitbucket.org:atlassian/atlassian-landlord-plugin.git
 atlassian-oauth,git@bitbucket.org:atlassian/atlassian-oauth.git
-atlassian-plugin-sdk,git@bitbucket.org:atlassian/atlassian-plugin-sdk.git
+#atlassian-plugin-sdk,git@bitbucket.org:atlassian/atlassian-plugin-sdk.git
 atlassian-plugins,git@bitbucket.org:atlassian/atlassian-plugins.git
 atlassian-pretty-urls,git@bitbucket.org:atlassian/atlassian-pretty-urls.git
 atlassian-refapp,git@bitbucket.org:atlassian/atlassian-refapp.git

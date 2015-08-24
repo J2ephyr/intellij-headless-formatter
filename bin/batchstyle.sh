@@ -17,7 +17,7 @@ do
     cat ../data/platform-module-branches.json |  jq '.modules[] | select(.name=="'$module'") | .branches| join(",")' | tr -d '"' | tr ',' '\n' | while read branch
     do
         # Remove everything before the last hyphen
-        version=${branch##*-![0-9]}
+        version=${branch##*-}
 
         # Remove the .x suffix
         version=${version%.x}
