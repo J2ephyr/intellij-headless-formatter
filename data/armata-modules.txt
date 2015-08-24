@@ -1,4 +1,4 @@
-amps,git@bitbucket.org:atlassian/amps.git
+#amps,git@bitbucket.org:atlassian/amps.git
 ao,git@bitbucket.org:activeobjects/ao.git
 ao-plugin,git@bitbucket.org:activeobjects/ao-plugin.git
 atlassian-annotations,git@bitbucket.org:atlassian/atlassian-annotations.git

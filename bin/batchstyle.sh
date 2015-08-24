@@ -7,6 +7,8 @@ cd working
 
 while read line
 do
+    [[ $line = \#* ]] && continue
+
     module=`echo $line | cut -d, -f1`
     repo=`echo $line | cut -d, -f2`
     echo "Processing module: $module with repo: $repo"
@@ -50,14 +52,14 @@ do
 
         # Check it worked, and if not log the problem and continue
         if [[ $? != 0 ]]; then
-            echo "\e[31m*******************************************************************************************"
-            echo "\e[31mFailed to format code for module: $module on branch: $branch"
-            echo "\e[31m*******************************************************************************************"
+            echo -e "\e[31m*******************************************************************************************"
+            echo -e "\e[31mFailed to format code for module: $module on branch: $branch"
+            echo -e "\e[31m*******************************************************************************************"
             continue
         fi
 
         git -C $module add .
-        git -C $module commit --author="codeformatter <>" -m "PLATFORM-159: Code formatting only"
+        git -C $module commit --author="codeformatter <>" -m "PLATFORM-159: Code formatting only - see JIRA issue for details."
 
     done
 done<../data/armata-modules.txt
