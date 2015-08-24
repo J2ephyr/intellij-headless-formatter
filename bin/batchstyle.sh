@@ -60,6 +60,7 @@ do
 
         git -C $module add .
         git -C $module commit --author="codeformatter <>" -m "PLATFORM-159: Code formatting only - see JIRA issue for details."
+        git -C $module push
 
     done
 done<../data/armata-modules.txt
