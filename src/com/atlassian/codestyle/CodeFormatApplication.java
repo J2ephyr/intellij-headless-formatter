@@ -22,9 +22,8 @@ import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
 import com.intellij.util.PlatformUtils;
-
-import javax.swing.*;
 import java.lang.reflect.InvocationTargetException;
+import javax.swing.*;
 import org.jetbrains.idea.maven.project.MavenProjectsManager;
 
 public class CodeFormatApplication extends IdeaApplication {
@@ -57,7 +56,7 @@ public class CodeFormatApplication extends IdeaApplication {
     private static void doCodeFormat(final String projectPomPath)
     {
         try {
-            System.out.println("Starting code format with pom.xml:" + projectPomPath);
+            System.out.println("Starting code format with pom.xml: " + projectPomPath);
 
             final Project project = setupProject(projectPomPath);
             setupJdk(project);
