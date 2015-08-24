@@ -9,6 +9,7 @@ import com.intellij.idea.Main;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ApplicationStarter;
 import com.intellij.openapi.application.PathManager;
+import com.intellij.openapi.application.ex.ApplicationManagerEx;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
@@ -17,8 +18,19 @@ import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
 import com.intellij.util.PlatformUtils;
 
+import java.lang.reflect.Field;
+import java.util.Queue;
 import javax.swing.*;
 import java.lang.reflect.InvocationTargetException;
+import org.jetbrains.idea.maven.project.MavenConsole;
+import org.jetbrains.idea.maven.project.MavenEmbeddersManager;
+import org.jetbrains.idea.maven.project.MavenProjectsManager;
+import org.jetbrains.idea.maven.project.MavenProjectsProcessor;
+import org.jetbrains.idea.maven.project.MavenProjectsProcessorBasicTask;
+import org.jetbrains.idea.maven.project.MavenProjectsProcessorTask;
+import org.jetbrains.idea.maven.utils.MavenProcessCanceledException;
+import org.jetbrains.idea.maven.utils.MavenProgressIndicator;
+//import org.jetbrains.idea.maven.project.MavenProjectsManager;
 
 public class CodeFormatApplication extends IdeaApplication {
 
@@ -51,13 +63,33 @@ public class CodeFormatApplication extends IdeaApplication {
     {
         try {
             System.out.println("Starting code format with pom.xml:" + projectPomPath);
+
+            ApplicationManagerEx.getApplicationEx().doNotSave(false);
+
             final Project project = ProjectUtil.openOrImport(projectPomPath, null, false);
+            project.save();
+
+//            MavenProjectsManager.getInstance(project).waitForArtifactsDownloadingCompletion();
+//            MavenProjectsManager.getInstance(project).waitForPostImportTasksCompletion();
+//            MavenProjectsManager.getInstance(project).waitForResolvingCompletion();
+
+//            final Project project = ProjectUtil.openProject("/Users/marcosscriven/development/sources/atlassian-annotations", null, false);
+//            project.save();
             ApplicationManager.getApplication().runWriteAction(new Runnable() {
                 @Override
                 public void run() {
                     VirtualFileManager.getInstance().refreshWithoutFileWatcher(false);
                 }
             });
+
+            final MavenProjectsManager mavenProjectsManager = MavenProjectsManager.getInstance(project);
+            System.out.printf("Waiting for Maven import...");
+            mavenProjectsManager.waitForResolvingCompletion();
+            System.out.println("Maven import complete.");
+            MavenProjectsManager.getInstance(project).importProjects();
+            System.out.println("Done reimporting after loading.");
+
+            project.save();
 
             CodeStyleSettingsManager.getInstance().getCurrentSettings().CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND=Integer.MAX_VALUE;
             CodeStyleSettingsManager.getInstance().getCurrentSettings().NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND=Integer.MAX_VALUE;
@@ -82,7 +114,7 @@ public class CodeFormatApplication extends IdeaApplication {
         }
         catch (Exception e) {
             // If for any reason we fail, we want to be able to carry on
-            System.out.println("Failed to run code format job:" + e);
+            System.out.println("Failed to run code format job:" + e.getMessage());
             System.exit(1);
         }
     }
@@ -105,6 +137,7 @@ public class CodeFormatApplication extends IdeaApplication {
                 app.run();
             }
         });
+
     }
 
 }
