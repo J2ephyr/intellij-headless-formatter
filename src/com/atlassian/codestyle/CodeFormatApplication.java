@@ -3,6 +3,7 @@ package com.atlassian.codestyle;
 import com.intellij.codeInsight.actions.OptimizeImportsProcessor;
 import com.intellij.codeInsight.actions.ReformatCodeAction;
 import com.intellij.codeInsight.actions.ReformatCodeProcessor;
+import com.intellij.core.CoreSdkType;
 import com.intellij.ide.impl.ProjectUtil;
 import com.intellij.idea.IdeaApplication;
 import com.intellij.idea.Main;
@@ -14,6 +15,13 @@ import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.projectRoots.JavaSdk;
+import com.intellij.openapi.projectRoots.ProjectJdkTable;
+import com.intellij.openapi.projectRoots.Sdk;
+import com.intellij.openapi.projectRoots.SdkType;
+import com.intellij.openapi.projectRoots.impl.JavaSdkImpl;
+import com.intellij.openapi.projectRoots.impl.ProjectJdkImpl;
+import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
 import com.intellij.util.PlatformUtils;
@@ -69,6 +77,23 @@ public class CodeFormatApplication extends IdeaApplication {
             final Project project = ProjectUtil.openOrImport(projectPomPath, null, false);
             project.save();
 
+            ApplicationManager.getApplication().runWriteAction(new Runnable() {
+                @Override
+                public void run() {
+
+//                    JavaSdk.getInstance();
+                    final ProjectJdkImpl newJdk = new ProjectJdkImpl("1.8", JavaSdk.getInstance());
+                    newJdk.setHomePath("/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home");
+                    SdkType sdkType = (SdkType)newJdk.getSdkType();
+                    sdkType.setupSdkPaths(newJdk, null);
+                    ProjectJdkTable.getInstance().addJdk(newJdk);
+//                    Sdk jdk = JavaSdk.getInstance().createJdk("1.8", "/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home");
+                    ProjectRootManager.getInstance(project).setProjectSdk(newJdk);
+                }
+            });
+
+            project.save();
+
 //            MavenProjectsManager.getInstance(project).waitForArtifactsDownloadingCompletion();
 //            MavenProjectsManager.getInstance(project).waitForPostImportTasksCompletion();
 //            MavenProjectsManager.getInstance(project).waitForResolvingCompletion();
@@ -90,7 +115,6 @@ public class CodeFormatApplication extends IdeaApplication {
             System.out.println("Done reimporting after loading.");
 
             project.save();
-
             CodeStyleSettingsManager.getInstance().getCurrentSettings().CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND=Integer.MAX_VALUE;
             CodeStyleSettingsManager.getInstance().getCurrentSettings().NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND=Integer.MAX_VALUE;
 
