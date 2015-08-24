@@ -30,4 +30,4 @@ fi
 # xattr -d com.apple.quarantine *
 
 echo "Compiling..."
-javac -classpath "idea/lib/*"  ../src/com/atlassian/codestyle/CodeFormatApplication.java -d .
+javac -classpath "idea/lib/*:idea/plugins/maven/lib/*"  ../src/com/atlassian/codestyle/CodeFormatApplication.java -d .
