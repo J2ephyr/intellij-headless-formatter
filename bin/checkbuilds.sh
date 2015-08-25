@@ -2,6 +2,12 @@
 
 BAMBOO="https://ecosystem-bamboo.internal.atlassian.com"
 
+if [ -z "${JSESSIONID}" ]
+then
+    echo "Set JSESSIONID in my environment to a current session ID for ${BAMBOO} snarfed from your browser" 1>&2
+    exit 1
+fi
+
 # Colours
 reset=`tput sgr0`
 red=`tput setaf 1`
