@@ -3,8 +3,11 @@
 We had a need to reformat multiple projects and branches using IntelliJ's code style. Rather than do this manually this
 little repo provides some scripts to do this automatically.
 
-To reformat all platform modules do the follow:
+## Prerequisites
+1. JDK 1.8
+2. jq (brew install jq)
 
+## To reformat all platform modules do the follow:
 1. git clone git@bitbucket.org:marcosscriven/intellij-headless-formatter.git
 2. ./bin/build.sh
 3. ./bin/batchstyle.sh
