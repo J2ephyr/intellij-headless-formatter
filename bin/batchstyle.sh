@@ -1,5 +1,10 @@
 #! /bin/bash
 
+# Colours
+reset=`tput sgr0`
+red=`tput setaf 1`
+green=`tput setaf 2`
+
 echo "Batch processing Armata platform modules."
 
 mkdir -p working
@@ -7,6 +12,7 @@ cd working
 
 while read line
 do
+    # Skip commented out modules
     [[ $line = \#* ]] && continue
 
     module=`echo $line | cut -d, -f1`
@@ -52,9 +58,9 @@ do
 
         # Check it worked, and if not log the problem and continue
         if [[ $? != 0 ]]; then
-            echo -e "\e[31m*******************************************************************************************"
-            echo -e "\e[31mFailed to format code for module: $module on branch: $branch"
-            echo -e "\e[31m*******************************************************************************************"
+            echo "${red}*******************************************************************************************"
+            echo "                Failed to format code for module: $module on branch: $branch"
+            echo "*******************************************************************************************${reset}"
             continue
         fi
 
