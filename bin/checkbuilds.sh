@@ -12,6 +12,7 @@ fi
 reset=`tput sgr0`
 red=`tput setaf 1`
 green=`tput setaf 2`
+orange=`tput setaf 172`
 
 while read line
 do
@@ -39,7 +40,7 @@ do
         echo "Branch: $branch ";
 
         # Get build status
-        buildState=$(curl -s "$BAMBOO/rest/branchinator/1.0/builds?repoId=$repoId&branchName=$branch" -H "Cookie: JSESSIONID=$JSESSIONID" | jq 'reduce .builds[] as $build (""; . + $build.planName + ":" + $build.buildState +  ":" + $build.planKey + ",")' | tr -d '"' | sed 's/,$//')
+        buildState=$(curl -s "$BAMBOO/rest/branchinator/1.0/builds?repoId=$repoId&branchName=$branch" -H "Cookie: JSESSIONID=$JSESSIONID" | jq 'reduce .builds[] as $build (""; . + $build.planName + ":" + $build.statusIcon.statusCode +  ":" + $build.planKey + ",")' | tr -d '"' | sed 's/,$//')
 
         if [[ -z "$buildState" ]]
         then
@@ -65,6 +66,9 @@ do
             if [[ $status == "FAILED" ]]
             then
               echo -n "${red}"
+            elif [[ $status == "INPROGRESS" ]]
+            then
+              echo -n "${orange}"
             else
               echo -n "${green}"
             fi
