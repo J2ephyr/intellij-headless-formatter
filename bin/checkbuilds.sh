@@ -66,11 +66,11 @@ do
             if [[ $status == "FAILED" ]]
             then
               echo -n "${red}"
-            elif [[ $status == "INPROGRESS" ]]
+            elif [[ $status == "SUCCESS" ]]
             then
-              echo -n "${orange}"
-            else
               echo -n "${green}"
+            else
+              echo -n "${orange}"
             fi
 
             echo " [$status]${reset} - $BAMBOO/browse/$planKey/latest"
