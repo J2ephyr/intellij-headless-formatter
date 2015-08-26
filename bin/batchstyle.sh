@@ -5,10 +5,13 @@ reset=`tput sgr0`
 red=`tput setaf 1`
 green=`tput setaf 2`
 
-echo "Batch processing Armata platform modules."
-
 mkdir -p working
 cd working
+
+log=build-`date +%s`.log
+exec &> >(tee -a "$log")
+
+echo "Batch processing Armata platform modules."
 
 while read line
 do
@@ -17,6 +20,7 @@ do
 
     module=`echo $line | cut -d, -f1`
     repo=`echo $line | cut -d, -f2`
+    echo "-------------------------------------------------------------------------------------------------------------"
     echo "Processing module: $module with repo: $repo"
 
     if [ ! -d $module/.git ]; then
