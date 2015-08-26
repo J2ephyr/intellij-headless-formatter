@@ -19,7 +19,8 @@ do
     [[ $line = \#* ]] && continue
 
     project=`echo $line | cut -d, -f1`
-    echo "Getting builds for $project"
+    echo "-------------------------------------------------------------------------------------------------------------"
+    echo "Module: $project"
 
     # Get ID of repo by name
     repoId=$(curl -s "$BAMBOO/rest/branchinator/1.0/repos?searchTerm=$project"  -H "Cookie: JSESSIONID=$JSESSIONID" | jq '.[0].id' | tr -d '"')
@@ -38,16 +39,23 @@ do
         echo "Branch: $branch ";
 
         # Get build status
-        buildState=$(curl -s "$BAMBOO/rest/branchinator/1.0/builds?repoId=$repoId&branchName=$branch" -H "Cookie: JSESSIONID=$JSESSIONID" | jq 'reduce .builds[] as $build (""; . + $build.planName + ": " + $build.buildState + ",")' | tr -d '"')
+        buildState=$(curl -s "$BAMBOO/rest/branchinator/1.0/builds?repoId=$repoId&branchName=$branch" -H "Cookie: JSESSIONID=$JSESSIONID" | jq 'reduce .builds[] as $build (""; . + $build.planName + ":" + $build.buildState +  ":" + $build.planKey + ",")' | tr -d '"' | sed 's/,$//')
         echo $buildState | tr "," "\n" | while read build; do
 
-            if [[ $build == *"Failed"* ]]
+            planName=$(echo $build | cut -d: -f1)
+            status=$(echo $build | cut -d: -f2 | tr '[:lower:]' '[:upper:]')
+            planKey=$(echo $build | cut -d: -f3)
+
+            echo -n "Plan: $planName status is"
+
+            if [[ $status == "FAILED" ]]
             then
               echo -n "${red}"
             else
               echo -n "${green}"
             fi
-            echo "$build${reset}"
+
+            echo " [$status]${reset} (Link: $BAMBOO/browse/$planKey/latest )"
 
         done;
     done;
