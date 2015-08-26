@@ -5,6 +5,9 @@ reset=`tput sgr0`
 red=`tput setaf 1`
 green=`tput setaf 2`
 
+rm -rf build/idea/config
+rm -rf build/idea/system
+
 mkdir -p working
 cd working
 
