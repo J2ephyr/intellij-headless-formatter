@@ -40,13 +40,20 @@ do
 
         # Get build status
         buildState=$(curl -s "$BAMBOO/rest/branchinator/1.0/builds?repoId=$repoId&branchName=$branch" -H "Cookie: JSESSIONID=$JSESSIONID" | jq 'reduce .builds[] as $build (""; . + $build.planName + ":" + $build.buildState +  ":" + $build.planKey + ",")' | tr -d '"' | sed 's/,$//')
+
+        if [[ -z "$buildState" ]]
+        then
+            echo "${red}No builds for this branch${reset}"
+            continue
+        fi
+
         echo $buildState | tr "," "\n" | while read build; do
 
             planName=$(echo $build | cut -d: -f1)
             status=$(echo $build | cut -d: -f2 | tr '[:lower:]' '[:upper:]')
             planKey=$(echo $build | cut -d: -f3)
 
-            echo -n "Plan: $planName status is"
+            echo -n "Build: $planName status is"
 
             if [[ $status == "FAILED" ]]
             then
@@ -55,7 +62,7 @@ do
               echo -n "${green}"
             fi
 
-            echo " [$status]${reset} (Link: $BAMBOO/browse/$planKey/latest )"
+            echo " [$status]${reset} - $BAMBOO/browse/$planKey/latest"
 
         done;
     done;
