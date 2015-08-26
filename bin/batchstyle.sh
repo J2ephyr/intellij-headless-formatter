@@ -19,6 +19,22 @@ do
     repo=`echo $line | cut -d, -f2`
     echo "Processing module: $module with repo: $repo"
 
+    if [ ! -d $module/.git ]; then
+        git clone $repo $module
+    fi
+
+    git -C $module fetch
+
+    if [[ $1 == "clean" ]]
+    then
+        git -C $module branch -r | grep PLATFORM-159 | sed 's/origin\///' | while read deleteBranch
+        do
+            echo "Deleting issue branch: $deleteBranch"
+            git -C $module push origin --delete $deleteBranch
+        done
+        continue
+    fi
+
     # Fetch the branches
     cat ../data/platform-module-branches.json |  jq '.modules[] | select(.name=="'$module'") | .branches| join(",")' | tr -d '"' | tr ',' '\n' | while read branch
     do
@@ -44,13 +60,9 @@ do
 
         echo "Processing branch: $branch on issue branch: $issueBranch"
 
-        if [ ! -d $module/.git ]; then
-            git clone $repo $module
-        fi
-
+        git -C $module reset --hard
         git -C $module checkout $branch
         git -C $module pull
-        git -C $module reset --hard
         git -C $module clean -dxf
         git -C $module checkout -b $issueBranch
 

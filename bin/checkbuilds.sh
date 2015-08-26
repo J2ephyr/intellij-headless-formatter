@@ -53,6 +53,13 @@ do
             status=$(echo $build | cut -d: -f2 | tr '[:lower:]' '[:upper:]')
             planKey=$(echo $build | cut -d: -f3)
 
+            if [[ $1 == "clean" ]]
+            then
+                echo "Deleting plan: $planKey"
+                curl -s "$BAMBOO/rest/branchinator/latest/actions/delete?planKey=$planKey"  -X DELETE -H "Cookie: JSESSIONID=$JSESSIONID"
+                continue;
+            fi
+
             echo -n "Build: $planName status is"
 
             if [[ $status == "FAILED" ]]
