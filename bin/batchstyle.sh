@@ -83,6 +83,26 @@ do
             continue
         fi
 
+        # This is here to marked version branches as merged
+        if [[ $1 == "emptymerge" ]]
+        then
+            aheadCount=`git -C $module rev-list HEAD ^master --oneline | grep -v PLATFORM-159 | wc -l | xargs`
+            codeFormatCount=`git -C $module rev-list HEAD ^master --oneline | grep PLATFORM-159 | wc -l | xargs`
+            if [[ $aheadCount > 0 ]]; then
+                echo "${red}$branch has commits other than PLATFORM-159. Not merging.${reset}"
+            else
+                if [[ $codeFormatCount != 1 ]]; then
+                    echo "${red}$branch doesn't contain PLATFORM-159 commits not reachable from master.${reset}"
+                else
+                    echo "${green}$branch is OK to merge.${reset}"
+                    git -C $module checkout master
+                    git -C $module merge $branch -s ours --no-edit
+                    git -C $module push
+                fi
+            fi
+            continue
+        fi
+
         issueBranch=$issueBranch/PLATFORM-159-code-reformat-`date +%s`
         echo "Processing branch: $branch on issue branch: $issueBranch"
         git -C $module checkout -b $issueBranch
