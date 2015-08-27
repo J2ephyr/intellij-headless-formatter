@@ -63,14 +63,28 @@ do
             issueBranch="issue-$version"
         fi
 
-        issueBranch=$issueBranch/PLATFORM-159-code-reformat-`date +%s`
-
-        echo "Processing branch: $branch on issue branch: $issueBranch"
-
         git -C $module reset --hard
         git -C $module checkout $branch
         git -C $module pull
         git -C $module clean -dxf
+
+        if [[ $1 == "merge" ]]
+        then
+            mergeBranch=`git -C $module branch -r | grep "$issueBranch/PLATFORM-159-code-reformat" | sed 's/origin\///'`
+            behindCount=`git -C $module log $mergeBranch..$branch --oneline | wc -l | xargs`
+            if [[ $behindCount > 0 ]]; then
+                echo "${red}$mergeBranch is behind $branch by $behindCount commits. Not merging.${reset}"
+            else
+                echo "${green}$mergeBranch is OK to merge.${reset}"
+                git -C $module merge $mergeBranch
+                echo "Pushing merge commit."
+                git -C $module push
+            fi
+            continue
+        fi
+
+        issueBranch=$issueBranch/PLATFORM-159-code-reformat-`date +%s`
+        echo "Processing branch: $branch on issue branch: $issueBranch"
         git -C $module checkout -b $issueBranch
 
         ../bin/codestyle.sh $module
