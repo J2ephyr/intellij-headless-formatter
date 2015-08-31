@@ -32,10 +32,11 @@ function emptymerge() {
   codeFormatCount=`git rev-list $source ^$target --oneline | grep PLATFORM-159 | wc -l | xargs`
 
   if [[ $aheadCount > 0 ]]; then
-      echo "${red}$source has unmerged commits other than PLATFORM-159. Not merging.${reset}"
+      echo "${red}$source has unmerged commits other than PLATFORM-159 not reachable from $target. NOT merging.${reset}"
+      git rev-list $source ^$target --oneline | grep -v PLATFORM-159
   else
       if [[ $codeFormatCount != 1 ]]; then
-          echo "${red}$source doesn't contain PLATFORM-159 commits not reachable from $target.${reset}"
+          echo "${red}$source doesn't contain PLATFORM-159 commits not reachable from $target. NOT merging.${reset}"
       else
           echo "${green}$source is OK to merge to $target.${reset}"
           echo "Would checkout $target, merge $source, and push"
