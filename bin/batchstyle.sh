@@ -38,7 +38,7 @@ function emptymerge() {
       if [[ $codeFormatCount != 1 ]]; then
           echo "${red}$source doesn't contain PLATFORM-159 commits not reachable from $target. NOT merging.${reset}"
       else
-          echo "${green}$source is OK to merge to $target. Going head...${reset}"
+          echo "${green}$source is OK to merge to $target. Going ahead...${reset}"
           git checkout $target
           git merge $source -s ours --no-edit
           git push
