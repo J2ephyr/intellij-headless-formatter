@@ -38,11 +38,10 @@ function emptymerge() {
       if [[ $codeFormatCount != 1 ]]; then
           echo "${red}$source doesn't contain PLATFORM-159 commits not reachable from $target. NOT merging.${reset}"
       else
-          echo "${green}$source is OK to merge to $target.${reset}"
-          echo "Would checkout $target, merge $source, and push"
-          # git checkout $target
-          # git merge $source -s ours --no-edit
-          # git push
+          echo "${green}$source is OK to merge to $target. Going head...${reset}"
+          git checkout $target
+          git merge $source -s ours --no-edit
+          git push
       fi
   fi
 
@@ -123,6 +122,8 @@ do
         # This is here to marked version branches as merged
         if [[ $1 == "emptymerge" ]]
         then
+
+            # Merge up to master
             emptymerge $module $branch master
 
             # Also merge previous branch up to this if necessary (and possible)
