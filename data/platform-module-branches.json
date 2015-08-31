@@ -48,7 +48,7 @@
     "branches": ["master"]
   },
   { "name": "atlassian-streams",
-    "branches": ["activity-stream-5.3.x", "activity-stream-5.4.x", "activity-stream-6.0.x", "activity-streams-5.0.x", "activity-streams-5.1.x", "activity-streams-5.2.x", "master"]
+    "branches": ["activity-streams-5.0.x", "activity-streams-5.1.x", "activity-streams-5.2.x", "activity-stream-5.3.x", "activity-stream-5.4.x", "activity-stream-6.0.x", "master"]
   },
   { "name": "atlassian-template-renderer",
     "branches": ["atlassian-template-renderer-1.2.x", "atlassian-template-renderer-1.3.x", "atlassian-template-renderer-1.4.x", "atlassian-template-renderer-1.5.x", "atlassian-template-renderer-2.0.x", "master"]
