@@ -3,7 +3,7 @@
     "branches": ["4.2-stable", "5.0-stable", "5.1-stable", "6.0-stable", "master"]
   },
   { "name": "ao",
-    "branches": ["master", "v0.25.x", "v0.26.x", "v0.27.x", "v0.28.x", "v0.29.x", "v1.0.x"]
+    "branches": ["v0.25.x", "v0.26.x", "v0.27.x", "v0.28.x", "v0.29.x", "v1.0.x", "master"]
   },
   { "name": "ao-plugin",
     "branches": ["activeobjects-plugin-0.25.x", "activeobjects-plugin-0.26.x", "activeobjects-plugin-0.27.x", "activeobjects-plugin-0.28.x", "activeobjects-plugin-0.29.x", "activeobjects-plugin-1.0.x", "master"]
@@ -36,13 +36,13 @@
     "branches": ["atlassian-pretty-urls-1.11.x", "atlassian-pretty-urls-2.0.x", "master"]
   },
   { "name": "atlassian-refapp",
-    "branches": ["master", "refapp-2.20.x", "refapp-2.21.x", "refapp-2.22.x", "refapp-2.23.x", "refapp-3.0.x"]
+    "branches": ["refapp-2.20.x", "refapp-2.21.x", "refapp-2.22.x", "refapp-2.23.x", "refapp-3.0.x", "master"]
   },
   { "name": "atlassian-rest",
-    "branches": ["master", "rest-2.4.x", "rest-2.5.x", "rest-2.6.x", "rest-2.7.x", "rest-2.8.x", "rest-2.9.x", "rest-3.0.x"]
+    "branches": ["rest-2.4.x", "rest-2.5.x", "rest-2.6.x", "rest-2.7.x", "rest-2.8.x", "rest-2.9.x", "rest-3.0.x", "master"]
   },
   { "name": "atlassian-sal",
-    "branches": ["master", "sal-2.10.x", "sal-2.11.x", "sal-2.12.x", "sal-2.13.x", "sal-2.7.x", "sal-2.8.x", "sal-2.9.x", "sal-3.0.x"]
+    "branches": ["sal-2.7.x", "sal-2.8.x", "sal-2.9.x", "sal-2.10.x", "sal-2.11.x", "sal-2.12.x", "sal-2.13.x", "sal-3.0.x", "master"]
   },
   { "name": "atlassian-spring-scanner",
     "branches": ["master"]

@@ -14,6 +14,40 @@ cd working
 log=build-`date +%s`.log
 exec &> >(tee -a "$log")
 
+function emptymerge() {
+
+  gitDir=$1
+  source=$2
+  target=$3
+
+  if [[ $source == $target ]]
+  then
+    echo "${red}Not merging as source: $source same as target: $target${reset}"
+    return
+  fi
+
+  cd $gitDir
+
+  aheadCount=`git rev-list $source ^$target --oneline | grep -v PLATFORM-159 | wc -l | xargs`
+  codeFormatCount=`git rev-list $source ^$target --oneline | grep PLATFORM-159 | wc -l | xargs`
+
+  if [[ $aheadCount > 0 ]]; then
+      echo "${red}$source has unmerged commits other than PLATFORM-159. Not merging.${reset}"
+  else
+      if [[ $codeFormatCount != 1 ]]; then
+          echo "${red}$source doesn't contain PLATFORM-159 commits not reachable from $target.${reset}"
+      else
+          echo "${green}$source is OK to merge to $target.${reset}"
+          echo "Would checkout $target, merge $source, and push"
+          # git checkout $target
+          # git merge $source -s ours --no-edit
+          # git push
+      fi
+  fi
+
+  cd -
+}
+
 echo "Batch processing Armata platform modules."
 
 while read line
@@ -23,6 +57,8 @@ do
 
     module=`echo $line | cut -d, -f1`
     repo=`echo $line | cut -d, -f2`
+    previousBranch=""
+
     echo "-------------------------------------------------------------------------------------------------------------"
     echo "Processing module: $module with repo: $repo"
 
@@ -86,20 +122,15 @@ do
         # This is here to marked version branches as merged
         if [[ $1 == "emptymerge" ]]
         then
-            aheadCount=`git -C $module rev-list HEAD ^master --oneline | grep -v PLATFORM-159 | wc -l | xargs`
-            codeFormatCount=`git -C $module rev-list HEAD ^master --oneline | grep PLATFORM-159 | wc -l | xargs`
-            if [[ $aheadCount > 0 ]]; then
-                echo "${red}$branch has commits other than PLATFORM-159. Not merging.${reset}"
-            else
-                if [[ $codeFormatCount != 1 ]]; then
-                    echo "${red}$branch doesn't contain PLATFORM-159 commits not reachable from master.${reset}"
-                else
-                    echo "${green}$branch is OK to merge.${reset}"
-                    git -C $module checkout master
-                    git -C $module merge $branch -s ours --no-edit
-                    git -C $module push
-                fi
+            emptymerge $module $branch master
+
+            # Also merge previous branch up to this if necessary (and possible)
+            if [[ $previousBranch != "" ]]
+            then
+              emptymerge $module $previousBranch $branch
             fi
+
+            previousBranch=$branch
             continue
         fi
 
