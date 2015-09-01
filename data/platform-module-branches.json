@@ -58,5 +58,8 @@
   },
   { "name": "functest-plugin",
     "branches": ["master"]
+  },
+  { "name": "atlassian-instrumentation",
+    "branches": ["atlassian-instrumentation-2.0.x", "master"]
   }
 ]}

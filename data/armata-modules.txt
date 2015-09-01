@@ -20,3 +20,4 @@ atlassian-template-renderer,git@bitbucket.org:atlassian/atlassian-template-rende
 atlassian-tenancy,git@bitbucket.org:atlassian/atlassian-tenancy.git
 atlassian-trusted-apps,git@bitbucket.org:atlassian/atlassian-trusted-apps.git
 functest-plugin,git@bitbucket.org:atlassian/functest-plugin.git
+atlassian-instrumentation,git@bitbucket.org:atlassian/atlassian-instrumentation.git
