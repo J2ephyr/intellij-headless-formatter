@@ -24,7 +24,10 @@ import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
 import com.intellij.util.PlatformUtils;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import javax.swing.*;
+
+import org.jetbrains.idea.maven.model.MavenExplicitProfiles;
 import org.jetbrains.idea.maven.project.MavenProjectsManager;
 
 public class CodeFormatApplication extends IdeaApplication {
@@ -117,11 +120,21 @@ public class CodeFormatApplication extends IdeaApplication {
     }
 
     private static void mavenImport(final Project project) {
-        System.out.println("Waiting for Maven import.");
+
+
         final MavenProjectsManager mavenProjectsManager = MavenProjectsManager.getInstance(project);
+        final MavenExplicitProfiles newExplicitProfiles = mavenProjectsManager.getExplicitProfiles().clone();
+
+        System.out.println("Enabling IDE profile if it's there.");
+        newExplicitProfiles.getEnabledProfiles().add("ide");
+        mavenProjectsManager.setExplicitProfiles(newExplicitProfiles);
+
+        System.out.println("Waiting for Maven import.");
         mavenProjectsManager.waitForResolvingCompletion();
         MavenProjectsManager.getInstance(project).importProjects();
         project.save();
+
+
     }
 
     private static void formatCode(final Project project) {
