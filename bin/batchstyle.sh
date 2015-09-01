@@ -123,10 +123,7 @@ do
         if [[ $1 == "emptymerge" ]]
         then
 
-            # Merge up to master
-            emptymerge $module $branch master
-
-            # Also merge previous branch up to this if necessary (and possible)
+            # Merge previous branch up to this if necessary (and possible)
             if [[ $previousBranch != "" ]]
             then
               emptymerge $module $previousBranch $branch
