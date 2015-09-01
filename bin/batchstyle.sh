@@ -35,7 +35,7 @@ function emptymerge() {
       echo "${red}$source has unmerged commits other than PLATFORM-159 not reachable from $target. NOT merging.${reset}"
       git rev-list $source ^$target --oneline | grep -v PLATFORM-159
   else
-      if [[ $codeFormatCount != 1 ]]; then
+      if [[ $codeFormatCount < 1 ]]; then
           echo "${red}$source doesn't contain PLATFORM-159 commits not reachable from $target. NOT merging.${reset}"
       else
           echo "${green}$source is OK to merge to $target. Going ahead...${reset}"
