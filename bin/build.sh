@@ -6,6 +6,10 @@ cd build
 if [ ! -f idea.tar.gz ]; then
     echo "Downloading IntelliJ"
     wget https://d1opms6zj7jotq.cloudfront.net/idea/ideaIC-142.4083.2.tar.gz -O idea.tar.gz
+    if [ ! $? -eq 0 ]; then
+        echo "Failed to wget IntelliJ idea.tar.gz"
+        exit 1
+    fi
 else
     echo "Already downloaded IntelliJ"
 fi
