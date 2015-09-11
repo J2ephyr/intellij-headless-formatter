@@ -61,5 +61,8 @@
   },
   { "name": "atlassian-instrumentation",
     "branches": ["atlassian-instrumentation-2.0.x", "master"]
+  },
+  { "name": "atlassian-landlord-plugin",
+    "branches": ["master"]
   }
 ]}

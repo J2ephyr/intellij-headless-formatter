@@ -21,3 +21,4 @@ atlassian-tenancy,git@bitbucket.org:atlassian/atlassian-tenancy.git
 atlassian-trusted-apps,git@bitbucket.org:atlassian/atlassian-trusted-apps.git
 functest-plugin,git@bitbucket.org:atlassian/functest-plugin.git
 atlassian-instrumentation,git@bitbucket.org:atlassian/atlassian-instrumentation.git
+atlassian-landlord-plugin,git@bitbucket.org:atlassian/atlassian-landlord-plugin.git
