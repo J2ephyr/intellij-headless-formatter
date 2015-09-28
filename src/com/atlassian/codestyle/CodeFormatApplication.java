@@ -132,6 +132,7 @@ public class CodeFormatApplication extends IdeaApplication {
         System.out.println("Waiting for Maven import.");
         mavenProjectsManager.waitForResolvingCompletion();
         MavenProjectsManager.getInstance(project).importProjects();
+
         project.save();
 
 
@@ -145,14 +146,22 @@ public class CodeFormatApplication extends IdeaApplication {
 
         final Module[] modules = ModuleManager.getInstance(project).getModules();
         for (Module module : modules) {
-            System.out.println("Reformatting code for module: " + module.getName());
-            final ReformatCodeProcessor processor = new ReformatCodeProcessor(project, module, false);
-            final OptimizeImportsProcessor optimizeImportsProcessor = new OptimizeImportsProcessor(processor);
+            
+			final ReformatCodeProcessor processor = new ReformatCodeProcessor(project, module, false);
+		    if ((module.getName().equals("jira-api")) || (module.getName().equals("jira-tests-parent"))) {
+					System.out.println("Reformatting code for module without imports: " + module.getName());
+			        // Reformat only Java classes
+			        ReformatCodeAction.registerFileMaskFilter(processor, "*.java");
+			        processor.run();
+			} else {
+			        final OptimizeImportsProcessor optimizeImportsProcessor = new OptimizeImportsProcessor(processor);
+				System.out.println("Reformatting code for module with imports: " + module.getName());
+			        // Reformat only Java classes
+			        ReformatCodeAction.registerFileMaskFilter(optimizeImportsProcessor, "*.java");
+			        optimizeImportsProcessor.run();
+	 	    }
 
-            // Reformat only Java classes
-            ReformatCodeAction.registerFileMaskFilter(optimizeImportsProcessor, "*.java");
-            optimizeImportsProcessor.run();
-        }
+		}      
 
         FileDocumentManager.getInstance().saveAllDocuments();
     }
