@@ -23,12 +23,11 @@ import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
 import com.intellij.util.PlatformUtils;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
-import javax.swing.*;
-
 import org.jetbrains.idea.maven.model.MavenExplicitProfiles;
 import org.jetbrains.idea.maven.project.MavenProjectsManager;
+
+import javax.swing.*;
+import java.lang.reflect.InvocationTargetException;
 
 public class CodeFormatApplication extends IdeaApplication {
 
@@ -146,22 +145,23 @@ public class CodeFormatApplication extends IdeaApplication {
 
         final Module[] modules = ModuleManager.getInstance(project).getModules();
         for (Module module : modules) {
-            
-			final ReformatCodeProcessor processor = new ReformatCodeProcessor(project, module, false);
-		    if ((module.getName().equals("jira-api")) || (module.getName().equals("jira-tests-parent"))) {
-					System.out.println("Reformatting code for module without imports: " + module.getName());
-			        // Reformat only Java classes
-			        ReformatCodeAction.registerFileMaskFilter(processor, "*.java");
-			        processor.run();
-			} else {
-			        final OptimizeImportsProcessor optimizeImportsProcessor = new OptimizeImportsProcessor(processor);
-				System.out.println("Reformatting code for module with imports: " + module.getName());
-			        // Reformat only Java classes
-			        ReformatCodeAction.registerFileMaskFilter(optimizeImportsProcessor, "*.java");
-			        optimizeImportsProcessor.run();
-	 	    }
 
-		}      
+
+
+            if ((module.getName().equals("jira-api")) || (module.getName().equals("jira-tests-parent"))) {
+                System.out.println("Reformatting code for module without imports: " + module.getName());
+                final ReformatCodeProcessor processor = new ReformatCodeProcessor(project, module, false);
+                ReformatCodeAction.registerFileMaskFilter(processor, "*.java");
+                processor.run();
+            } else {
+                final ReformatCodeProcessor processor = new ReformatCodeProcessor(project, module, false);
+                final OptimizeImportsProcessor optimizeImportsProcessor = new OptimizeImportsProcessor(processor);
+                System.out.println("Reformatting code for module with imports: " + module.getName());
+                ReformatCodeAction.registerFileMaskFilter(optimizeImportsProcessor, "*.java");
+                optimizeImportsProcessor.run();
+            }
+
+        }
 
         FileDocumentManager.getInstance().saveAllDocuments();
     }
