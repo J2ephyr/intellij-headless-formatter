@@ -28,6 +28,9 @@ import org.jetbrains.idea.maven.project.MavenProjectsManager;
 
 import javax.swing.*;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 public class CodeFormatApplication extends IdeaApplication {
 
@@ -120,13 +123,27 @@ public class CodeFormatApplication extends IdeaApplication {
 
     private static void mavenImport(final Project project) {
 
-
         final MavenProjectsManager mavenProjectsManager = MavenProjectsManager.getInstance(project);
         final MavenExplicitProfiles newExplicitProfiles = mavenProjectsManager.getExplicitProfiles().clone();
 
-        System.out.println("Enabling IDE profile if it's there.");
-        newExplicitProfiles.getEnabledProfiles().add("ide");
+        final Set<String> jiraProfiles = new HashSet<>(
+                Arrays.asList("add-bundled-plugins",
+                        "build-source-distribution," +
+                        "defaultProfile",
+                        "distribution",
+                        "final-distros",
+                        "ide-setup",
+                        "jmake",
+                        "ondemand",
+                        "ondemand-acceptance-tests",
+                        "prepare-integration-tests",
+                        "test-modules"));
+
+        jiraProfiles.forEach(profile -> newExplicitProfiles.getEnabledProfiles().add(profile));
         mavenProjectsManager.setExplicitProfiles(newExplicitProfiles);
+
+        System.out.println("Enabled Maven profiles: ");
+        mavenProjectsManager.getExplicitProfiles().getEnabledProfiles().forEach(name -> System.out.println("\t - " + name));
 
         System.out.println("Waiting for Maven import.");
         mavenProjectsManager.waitForResolvingCompletion();
@@ -146,20 +163,12 @@ public class CodeFormatApplication extends IdeaApplication {
         final Module[] modules = ModuleManager.getInstance(project).getModules();
         for (Module module : modules) {
 
+            System.out.println("Reformating : " + module.getName());
 
-
-            if ((module.getName().equals("jira-api")) || (module.getName().equals("jira-tests-parent"))) {
-                System.out.println("Reformatting code for module without imports: " + module.getName());
-                final ReformatCodeProcessor processor = new ReformatCodeProcessor(project, module, false);
-                ReformatCodeAction.registerFileMaskFilter(processor, "*.java");
-                processor.run();
-            } else {
-                final ReformatCodeProcessor processor = new ReformatCodeProcessor(project, module, false);
-                final OptimizeImportsProcessor optimizeImportsProcessor = new OptimizeImportsProcessor(processor);
-                System.out.println("Reformatting code for module with imports: " + module.getName());
-                ReformatCodeAction.registerFileMaskFilter(optimizeImportsProcessor, "*.java");
-                optimizeImportsProcessor.run();
-            }
+            final ReformatCodeProcessor processor = new ReformatCodeProcessor(project, module, false);
+            final OptimizeImportsProcessor optimizeImportsProcessor = new OptimizeImportsProcessor(processor);
+            ReformatCodeAction.registerFileMaskFilter(optimizeImportsProcessor, "*.java");
+            optimizeImportsProcessor.run();
 
         }
 
