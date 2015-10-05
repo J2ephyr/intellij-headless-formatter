@@ -132,7 +132,6 @@ public class CodeFormatApplication extends IdeaApplication {
                         "defaultProfile",
                         "distribution",
                         "final-distros",
-                        "ide-setup",
                         "jmake",
                         "ondemand",
                         "ondemand-acceptance-tests",
@@ -156,8 +155,8 @@ public class CodeFormatApplication extends IdeaApplication {
 
     private static void formatCode(final Project project) {
         final CodeStyleSettings codeStyleSettings = CodeStyleSettingsManager.getInstance().getCurrentSettings();
-        codeStyleSettings.CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND=Integer.MAX_VALUE;
-        codeStyleSettings.NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND=Integer.MAX_VALUE;
+        codeStyleSettings.CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND=9999;
+        codeStyleSettings.NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND=9999;
         codeStyleSettings.JD_P_AT_EMPTY_LINES=false;
 
         final Module[] modules = ModuleManager.getInstance(project).getModules();
