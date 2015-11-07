@@ -1,7 +1,5 @@
 package com.atlassian.codestyle;
 
-import com.intellij.codeInsight.actions.OptimizeImportsProcessor;
-import com.intellij.codeInsight.actions.ReformatCodeAction;
 import com.intellij.codeInsight.actions.ReformatCodeProcessor;
 import com.intellij.ide.impl.ProjectUtil;
 import com.intellij.idea.IdeaApplication;
@@ -23,12 +21,11 @@ import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
 import com.intellij.util.PlatformUtils;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
-import javax.swing.*;
-
-import org.jetbrains.idea.maven.model.MavenExplicitProfiles;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.idea.maven.project.MavenProjectsManager;
+
+import javax.swing.*;
+import java.lang.reflect.InvocationTargetException;
 
 public class CodeFormatApplication extends IdeaApplication {
 
@@ -36,6 +33,7 @@ public class CodeFormatApplication extends IdeaApplication {
         super(args);
     }
 
+    @NotNull
     @Override
     public ApplicationStarter getStarter() {
 
@@ -94,40 +92,27 @@ public class CodeFormatApplication extends IdeaApplication {
             System.exit(1);
         }
 
-        ApplicationManager.getApplication().runWriteAction(new Runnable() {
-            @Override
-            public void run() {
-                VirtualFileManager.getInstance().refreshWithoutFileWatcher(false);
-            }
+        ApplicationManager.getApplication().runWriteAction(() -> {
+            VirtualFileManager.getInstance().refreshWithoutFileWatcher(false);
         });
         return project;
     }
 
     private static void setupJdk(final Project project) {
         System.out.println("Setting up and indexing JDK.");
-        ApplicationManager.getApplication().runWriteAction(new Runnable() {
-            @Override
-            public void run() {
+        ApplicationManager.getApplication().runWriteAction(() -> {
 
-                final ProjectJdkImpl newJdk = new ProjectJdkImpl("1.8", JavaSdk.getInstance());
-                newJdk.setHomePath("/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home");
-                SdkType sdkType = (SdkType) newJdk.getSdkType();
-                sdkType.setupSdkPaths(newJdk, null);
-                ProjectJdkTable.getInstance().addJdk(newJdk);
-                ProjectRootManager.getInstance(project).setProjectSdk(newJdk);
-            }
+            final ProjectJdkImpl newJdk = new ProjectJdkImpl("1.8", JavaSdk.getInstance());
+            newJdk.setHomePath("/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home");
+            SdkType sdkType = (SdkType) newJdk.getSdkType();
+            sdkType.setupSdkPaths(newJdk, null);
+            ProjectJdkTable.getInstance().addJdk(newJdk);
+            ProjectRootManager.getInstance(project).setProjectSdk(newJdk);
         });
     }
 
     private static void mavenImport(final Project project) {
-
-
         final MavenProjectsManager mavenProjectsManager = MavenProjectsManager.getInstance(project);
-        final MavenExplicitProfiles newExplicitProfiles = mavenProjectsManager.getExplicitProfiles().clone();
-
-        System.out.println("Enabling IDE profile if it's there.");
-        newExplicitProfiles.getEnabledProfiles().add("ide");
-        mavenProjectsManager.setExplicitProfiles(newExplicitProfiles);
 
         System.out.println("Waiting for Maven import.");
         mavenProjectsManager.waitForResolvingCompletion();
@@ -139,6 +124,7 @@ public class CodeFormatApplication extends IdeaApplication {
 
     private static void formatCode(final Project project) {
         final CodeStyleSettings codeStyleSettings = CodeStyleSettingsManager.getInstance().getCurrentSettings();
+
         codeStyleSettings.CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND=Integer.MAX_VALUE;
         codeStyleSettings.NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND=Integer.MAX_VALUE;
         codeStyleSettings.JD_P_AT_EMPTY_LINES=false;
@@ -147,11 +133,7 @@ public class CodeFormatApplication extends IdeaApplication {
         for (Module module : modules) {
             System.out.println("Reformatting code for module: " + module.getName());
             final ReformatCodeProcessor processor = new ReformatCodeProcessor(project, module, false);
-            final OptimizeImportsProcessor optimizeImportsProcessor = new OptimizeImportsProcessor(processor);
-
-            // Reformat only Java classes
-            ReformatCodeAction.registerFileMaskFilter(optimizeImportsProcessor, "*.java");
-            optimizeImportsProcessor.run();
+            processor.run();
         }
 
         FileDocumentManager.getInstance().saveAllDocuments();
@@ -169,13 +151,6 @@ public class CodeFormatApplication extends IdeaApplication {
 
         final CodeFormatApplication app = new CodeFormatApplication(args);
 
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                app.run();
-            }
-        });
-
+        SwingUtilities.invokeLater(app::run);
     }
-
 }
