@@ -1,6 +1,8 @@
 package com.atlassian.codestyle;
 
 import com.intellij.codeInsight.actions.ReformatCodeProcessor;
+import com.intellij.execution.configurations.GeneralCommandLine;
+import com.intellij.execution.util.ExecUtil;
 import com.intellij.ide.impl.ProjectUtil;
 import com.intellij.idea.IdeaApplication;
 import com.intellij.idea.Main;
@@ -17,14 +19,17 @@ import com.intellij.openapi.projectRoots.ProjectJdkTable;
 import com.intellij.openapi.projectRoots.SdkType;
 import com.intellij.openapi.projectRoots.impl.ProjectJdkImpl;
 import com.intellij.openapi.roots.ProjectRootManager;
+import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
 import com.intellij.util.PlatformUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.idea.maven.project.MavenProjectsManager;
 
 import javax.swing.*;
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 
 public class CodeFormatApplication extends IdeaApplication {
@@ -83,7 +88,7 @@ public class CodeFormatApplication extends IdeaApplication {
         System.out.println("Setting up project.");
         ApplicationManagerEx.getApplicationEx().doNotSave(false);
 
-        final Project project = ProjectUtil.openOrImport(projectPomPath, null, false);
+        final Project project = ProjectUtil.openProject(projectPomPath, null, false);
         if(project != null) {
             project.save();
         }
@@ -103,7 +108,7 @@ public class CodeFormatApplication extends IdeaApplication {
         ApplicationManager.getApplication().runWriteAction(() -> {
 
             final ProjectJdkImpl newJdk = new ProjectJdkImpl("1.8", JavaSdk.getInstance());
-            newJdk.setHomePath("/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home");
+            newJdk.setHomePath(suggestHomePath());
             SdkType sdkType = (SdkType) newJdk.getSdkType();
             sdkType.setupSdkPaths(newJdk, null);
             ProjectJdkTable.getInstance().addJdk(newJdk);
@@ -118,8 +123,6 @@ public class CodeFormatApplication extends IdeaApplication {
         mavenProjectsManager.waitForResolvingCompletion();
         MavenProjectsManager.getInstance(project).importProjects();
         project.save();
-
-
     }
 
     private static void formatCode(final Project project) {
@@ -137,6 +140,50 @@ public class CodeFormatApplication extends IdeaApplication {
         }
 
         FileDocumentManager.getInstance().saveAllDocuments();
+    }
+
+    @Nullable
+    private static String suggestHomePath() {
+        if (SystemInfo.isMac) {
+            if (new File("/usr/libexec/java_home").canExecute()) {
+                String path = ExecUtil.execAndReadLine(new GeneralCommandLine("/usr/libexec/java_home"));
+                if (path != null && new File(path).isDirectory()) {
+                    return path;
+                }
+            }
+
+            String home = checkKnownLocations("/Library/Java/JavaVirtualMachines", "/System/Library/Java/JavaVirtualMachines");
+            if (home != null) return home;
+        }
+
+        if (SystemInfo.isLinux) {
+            String home = checkKnownLocations("/usr/lib/jvm/java-8-jdk");
+            if (home != null) return home;
+        }
+
+        String property = System.getProperty("java.home");
+        if (property != null) {
+            File javaHome = new File(property);
+            if (javaHome.getName().equals("jre")) {
+                javaHome = javaHome.getParentFile();
+            }
+            if (javaHome != null && javaHome.isDirectory()) {
+                return javaHome.getAbsolutePath();
+            }
+        }
+
+        return null;
+    }
+
+    @Nullable
+    private static String checkKnownLocations(String... locations) {
+        for (String home : locations) {
+            if (new File(home).isDirectory()) {
+                return home;
+            }
+        }
+
+        return null;
     }
 
     public static void main(String[] args) throws InvocationTargetException, InterruptedException {
