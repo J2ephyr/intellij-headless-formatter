@@ -1,4 +1,4 @@
-package com.atlassian.codestyle;
+package com.terradatum.codestyle;
 
 import com.intellij.codeInsight.actions.ReformatCodeProcessor;
 import com.intellij.execution.configurations.GeneralCommandLine;
@@ -188,7 +188,7 @@ public class CodeFormatApplication extends IdeaApplication {
             try {
                 Files.copy(codeStyleSettings.toPath(), ideaDirectory.toPath().resolve(codeStyleSettings.toPath().getFileName()));
             } catch (IOException e) {
-                System.out.println("Failed to run code format job: " + e);
+                System.out.println("Failed to copy the codeStyleSettings.xml file: " + e);
                 e.printStackTrace();
                 System.exit(1);
             }
