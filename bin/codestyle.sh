@@ -1,10 +1,9 @@
-#!/bin/bash -x
+#!/bin/bash
 
 # Mac or Linux
 PLATFORM=$(uname -s)
 
 PROJECT_PATH=$1
-POM_PATH=$1/pom.xml
 
 SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 BUILD_DIR=${SCRIPT_DIR}/../build
@@ -22,6 +21,6 @@ rm -rf ${BUILD_DIR}/idea/system
 JAVA_HOME="$JHOME"
 
 # NO DEBUG
-#java -Didea.plugins.path=${PLUGINS_DIR} -classpath "$JAVA_HOME/lib/*:$BUILD_DIR:$BUILD_DIR/idea/lib/*:$BUILD_DIR/plugins/maven/lib/*:$BUILD_DIR/plugins/properties/lib/*" com.atlassian.codestyle.CodeFormatApplication ${POM_PATH}
+#java -Dlog4j.configuration=${SCRIPT_DIR}/log4j.xml -Dcode.style=${SCRIPT_DIR}/codeStyleSettings.xml -Didea.plugins.path=${PLUGINS_DIR} -classpath "$JAVA_HOME/lib/*:$BUILD_DIR:$BUILD_DIR/idea/lib/*:$BUILD_DIR/plugins/maven/lib/*:$BUILD_DIR/plugins/properties/lib/*:$BUILD_DIR/plugins/eclipse/lib/*" com.atlassian.codestyle.CodeFormatApplication ${PROJECT_PATH}
 # DEBUG
-java -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005 -Didea.plugins.path=${PLUGINS_DIR} -classpath "$JAVA_HOME/lib/*:$BUILD_DIR:$BUILD_DIR/idea/lib/*:$BUILD_DIR/plugins/maven/lib/*:$BUILD_DIR/plugins/properties/lib/*" com.atlassian.codestyle.CodeFormatApplication ${POM_PATH}
+java -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005 -Dlog4j.configuration=${SCRIPT_DIR}/log4j.xml -Dcode.style=${SCRIPT_DIR}/codeStyleSettings.xml -Didea.plugins.path=${PLUGINS_DIR} -classpath "$JAVA_HOME/lib/*:$BUILD_DIR:$BUILD_DIR/idea/lib/*:$BUILD_DIR/plugins/maven/lib/*:$BUILD_DIR/plugins/properties/lib/*:$BUILD_DIR/plugins/eclipse/lib/*:$BUILD_DIR/plugins/Scala/lib/*:$BUILD_DIR/plugins/Scala/launcher/*" com.atlassian.codestyle.CodeFormatApplication ${PROJECT_PATH}

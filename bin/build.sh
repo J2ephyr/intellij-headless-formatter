@@ -22,16 +22,36 @@ else
     echo "Already unarchived IntelliJ"
 fi
 
+if [ ! -f scala.zip ]; then
+    echo "Downloading Scala plugin"
+    wget "https://plugins.jetbrains.com/plugin/download?pr=idea&updateId=22150" -O scala.zip
+    if [ ! $? -eq 0 ]; then
+        echo "Failed to wget Scala plugin scala.zip"
+        exit 1
+    fi
+else
+    echo "Already downloaded Scala plugin"
+fi
+
+if [ ! -d idea/plugins/Scala ] ; then
+    echo "Unarchiving Scala plugin"
+    unzip scala.zip -d idea/plugins
+else
+    echo "Already unarchived Scala plugin"
+fi
+
 if [ ! -d plugins ] ; then
-    echo "Linking Maven and Properties plugins"
+    echo "Linking Maven, Properties, Eclipse and Scala plugins"
     mkdir plugins
     ln -s ../idea/plugins/maven plugins/maven
     ln -s ../idea/plugins/properties plugins/properties
+    ln -s ../idea/plugins/eclipse plugins/eclipse
+    ln -s ../idea/plugins/Scala plugins/Scala
 else
-    echo "Already linked Maven and Properties plugins"
+    echo "Already linked Maven, Properties, Eclipse and Scala plugins"
 fi
 
 # xattr -d com.apple.quarantine *
 
 echo "Compiling..."
-javac -classpath "idea/lib/*:idea/plugins/maven/lib/*"  ../src/com/atlassian/codestyle/CodeFormatApplication.java -d .
+javac -classpath "idea/lib/*:idea/plugins/maven/lib/*:idea/plugins/properties/lib/*:idea/plugins/eclipse/lib/*:idea/plugins/Scala/lib/*:idea/plugins/Scala/launcher/*"  ../src/com/atlassian/codestyle/CodeFormatApplication.java -d .
