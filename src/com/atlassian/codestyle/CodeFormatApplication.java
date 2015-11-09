@@ -24,13 +24,17 @@ import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
 import com.intellij.util.PlatformUtils;
+import org.apache.log4j.BasicConfigurator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.idea.maven.project.MavenProjectsManager;
 
 import javax.swing.*;
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class CodeFormatApplication extends IdeaApplication {
 
@@ -38,36 +42,28 @@ public class CodeFormatApplication extends IdeaApplication {
         super(args);
     }
 
-    @NotNull
-    @Override
-    public ApplicationStarter getStarter() {
+    public static void main(String[] args) throws InvocationTargetException, InterruptedException {
 
-        return new ApplicationStarter() {
-            @Override
-            public String getCommandName() {
-                return "codeformat";
-            }
+        BasicConfigurator.configure();
 
-            @Override
-            public void premain(String[] args) {
-                // Nothing to do
-            }
+        System.setProperty(PlatformUtils.PLATFORM_PREFIX_KEY, PlatformUtils.getPlatformPrefix(PlatformUtils.IDEA_CE_PREFIX));
+        System.setProperty("java.awt.headless", "true");
+        System.setProperty("idea.is.unit.test", "true");
 
-            @Override
-            public void main(String[] args) {
-                doCodeFormat(args[0]);
-            }
-        };
+        final String pluginsPath = System.getProperty(PathManager.PROPERTY_PLUGINS_PATH);
+        System.out.println("Plugins loaded from path: " + pluginsPath);
+        Main.setFlags(null);
+
+        final CodeFormatApplication app = new CodeFormatApplication(args);
+
+        SwingUtilities.invokeLater(app::run);
     }
 
-    private static void doCodeFormat(final String projectPomPath)
-    {
+    private static void doCodeFormat(final String projectPAth) {
         try {
-            System.out.println("Starting code format with pom.xml: " + projectPomPath);
+            System.out.println("Starting code format with: " + projectPAth);
 
-            final Project project = setupProject(projectPomPath);
-            setupJdk(project);
-            mavenImport(project);
+            final Project project = setupProject(projectPAth);
             formatCode(project);
 
             System.out.println("Finished code format.");
@@ -75,8 +71,7 @@ public class CodeFormatApplication extends IdeaApplication {
             // This should work, but still seems to ask for confirmation which doesn't work in a headless environment
             // ApplicationManagerEx.getApplicationEx().exit(true, false);
             System.exit(0);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             // If for any reason we fail, we want to be able to carry on
             System.out.println("Failed to run code format job: " + e);
             e.printStackTrace();
@@ -84,15 +79,60 @@ public class CodeFormatApplication extends IdeaApplication {
         }
     }
 
-    private static Project setupProject(final String projectPomPath) {
+    private static Project setupProject(final String projectPath) {
         System.out.println("Setting up project.");
+
         ApplicationManagerEx.getApplicationEx().doNotSave(false);
 
-        final Project project = ProjectUtil.openProject(projectPomPath, null, false);
-        if(project != null) {
-            project.save();
+        final Project project;
+        if (Files.exists(Paths.get(projectPath, ".idea"))) {
+            project = setupIdeaProject(projectPath);
+        } else if (Files.exists(Paths.get(projectPath, "pom.xml"))) {
+            project = setupMavenProject(projectPath);
+        } else {
+            project = setupSourceProject(projectPath);
         }
-        else {
+
+        return project;
+    }
+
+    private static Project setupIdeaProject(String projectPath) {
+        Project project;
+        project = ProjectUtil.openProject(projectPath, null, false);
+
+        refreshProject(project);
+        return project;
+    }
+
+    private static Project setupMavenProject(String projectPath) {
+        Project project;
+        project = ProjectUtil.openOrImport(Paths.get(projectPath, "pom.xml").toString(), null, false);
+
+        refreshProject(project);
+        setupJdk(project);
+        mavenImport(project);
+        useSuppliedCodeStyleSettings(project);
+        refreshProject(project);
+
+        return project;
+    }
+
+    private static Project setupSourceProject(String projectPath) {
+        Project project;
+        project = ProjectUtil.openOrImport(projectPath, null, false);
+
+        refreshProject(project);
+        setupJdk(project);
+        useSuppliedCodeStyleSettings(project);
+        refreshProject(project);
+
+        return project;
+    }
+
+    private static void refreshProject(Project project) {
+        if (project != null) {
+            project.save();
+        } else {
             System.out.println("Couldn't load project.");
             System.exit(1);
         }
@@ -100,14 +140,13 @@ public class CodeFormatApplication extends IdeaApplication {
         ApplicationManager.getApplication().runWriteAction(() -> {
             VirtualFileManager.getInstance().refreshWithoutFileWatcher(false);
         });
-        return project;
     }
 
     private static void setupJdk(final Project project) {
         System.out.println("Setting up and indexing JDK.");
         ApplicationManager.getApplication().runWriteAction(() -> {
 
-            final ProjectJdkImpl newJdk = new ProjectJdkImpl("1.8", JavaSdk.getInstance());
+            final ProjectJdkImpl newJdk = new ProjectJdkImpl("JDK 1.8", JavaSdk.getInstance());
             newJdk.setHomePath(suggestHomePath());
             SdkType sdkType = (SdkType) newJdk.getSdkType();
             sdkType.setupSdkPaths(newJdk, null);
@@ -121,16 +160,15 @@ public class CodeFormatApplication extends IdeaApplication {
 
         System.out.println("Waiting for Maven import.");
         mavenProjectsManager.waitForResolvingCompletion();
-        MavenProjectsManager.getInstance(project).importProjects();
-        project.save();
+        mavenProjectsManager.importProjects();
     }
 
     private static void formatCode(final Project project) {
-        final CodeStyleSettings codeStyleSettings = CodeStyleSettingsManager.getInstance().getCurrentSettings();
 
-        codeStyleSettings.CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND=Integer.MAX_VALUE;
-        codeStyleSettings.NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND=Integer.MAX_VALUE;
-        codeStyleSettings.JD_P_AT_EMPTY_LINES=false;
+        final CodeStyleSettings codeStyleSettings = CodeStyleSettingsManager.getInstance(project).getCurrentSettings();
+        codeStyleSettings.CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND = Integer.MAX_VALUE;
+        codeStyleSettings.NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND = Integer.MAX_VALUE;
+        codeStyleSettings.JD_P_AT_EMPTY_LINES = false;
 
         final Module[] modules = ModuleManager.getInstance(project).getModules();
         for (Module module : modules) {
@@ -140,6 +178,21 @@ public class CodeFormatApplication extends IdeaApplication {
         }
 
         FileDocumentManager.getInstance().saveAllDocuments();
+    }
+
+    private static void useSuppliedCodeStyleSettings(Project project) {
+        File codeStyleSettings = new File(System.getProperty("code.style"));
+        File ideaDirectory = new File(project.getBasePath(), ".idea");
+        if (codeStyleSettings.exists() && ideaDirectory.exists()) {
+            System.out.println("Copying codeStyleSettings.xml from " + codeStyleSettings.toPath());
+            try {
+                Files.copy(codeStyleSettings.toPath(), ideaDirectory.toPath().resolve(codeStyleSettings.toPath().getFileName()));
+            } catch (IOException e) {
+                System.out.println("Failed to run code format job: " + e);
+                e.printStackTrace();
+                System.exit(1);
+            }
+        }
     }
 
     @Nullable
@@ -186,18 +239,26 @@ public class CodeFormatApplication extends IdeaApplication {
         return null;
     }
 
-    public static void main(String[] args) throws InvocationTargetException, InterruptedException {
+    @NotNull
+    @Override
+    public ApplicationStarter getStarter() {
 
-        System.setProperty(PlatformUtils.PLATFORM_PREFIX_KEY, PlatformUtils.getPlatformPrefix(PlatformUtils.IDEA_CE_PREFIX));
-        System.setProperty("java.awt.headless", "true");
-        System.setProperty("idea.is.unit.test", "true");
+        return new ApplicationStarter() {
+            @Override
+            public String getCommandName() {
+                return "codeformat";
+            }
 
-        final String pluginsPath = System.getProperty(PathManager.PROPERTY_PLUGINS_PATH) ;
-        System.out.println("Plugins loaded from path: " + pluginsPath);
-        Main.setFlags(null);
+            @Override
+            public void premain(String[] args) {
+                // Nothing to do
+            }
 
-        final CodeFormatApplication app = new CodeFormatApplication(args);
-
-        SwingUtilities.invokeLater(app::run);
+            @Override
+            public void main(String[] args) {
+                doCodeFormat(args[0]);
+            }
+        };
     }
+
 }
