@@ -1,9 +1,12 @@
-#!/bin/bash -x
+#!/bin/bash
 
 # Mac or Linux
 PLATFORM=$(uname -s)
 
 PROJECT_PATH=$1
+
+# make it absolute
+PROJECT_PATH=$( cd ${PROJECT_PATH}; pwd)
 
 SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 BUILD_DIR=${SCRIPT_DIR}/../build
