@@ -2,10 +2,10 @@
 SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 BUILD_DIR=${SCRIPT_DIR}/../build
 
+mkdir -p ${BUILD_DIR}
+
 # make it absolute
 BUILD_DIR=$(cd ${BUILD_DIR}; pwd)
-
-mkdir -p ${BUILD_DIR}
 
 if [ ! -f ${BUILD_DIR}/idea.tar.gz ]; then
     echo "Downloading IntelliJ"
