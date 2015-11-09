@@ -21,6 +21,6 @@ rm -rf ${BUILD_DIR}/idea/system
 JAVA_HOME="$JHOME"
 
 # NO DEBUG
-#java -Dlog4j.configuration=${SCRIPT_DIR}/log4j.xml -Dcode.style=${SCRIPT_DIR}/codeStyleSettings.xml -Didea.plugins.path=${PLUGINS_DIR} -classpath "$JAVA_HOME/lib/*:$BUILD_DIR:$BUILD_DIR/idea/lib/*:$BUILD_DIR/plugins/maven/lib/*:$BUILD_DIR/plugins/properties/lib/*:$BUILD_DIR/plugins/eclipse/lib/*" com.terradatum.codestyle.CodeFormatApplication ${PROJECT_PATH}
+java -Dlog4j.configuration=${SCRIPT_DIR}/log4j.xml -Dcode.style=${SCRIPT_DIR}/codeStyleSettings.xml -Didea.plugins.path=${PLUGINS_DIR} -classpath "$JAVA_HOME/lib/*:$BUILD_DIR:$BUILD_DIR/idea/lib/*:$BUILD_DIR/plugins/maven/lib/*:$BUILD_DIR/plugins/properties/lib/*:$BUILD_DIR/plugins/eclipse/lib/*" com.terradatum.codestyle.CodeFormatApplication ${PROJECT_PATH}
 # DEBUG
-java -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005 -Dlog4j.configuration=${SCRIPT_DIR}/log4j.xml -Dcode.style=${SCRIPT_DIR}/codeStyleSettings.xml -Didea.plugins.path=${PLUGINS_DIR} -classpath "$JAVA_HOME/lib/*:$BUILD_DIR:$BUILD_DIR/idea/lib/*:$BUILD_DIR/plugins/maven/lib/*:$BUILD_DIR/plugins/properties/lib/*:$BUILD_DIR/plugins/eclipse/lib/*" com.terradatum.codestyle.CodeFormatApplication ${PROJECT_PATH}
+#java -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005 -Dlog4j.configuration=${SCRIPT_DIR}/log4j.xml -Dcode.style=${SCRIPT_DIR}/codeStyleSettings.xml -Didea.plugins.path=${PLUGINS_DIR} -classpath "$JAVA_HOME/lib/*:$BUILD_DIR:$BUILD_DIR/idea/lib/*:$BUILD_DIR/plugins/maven/lib/*:$BUILD_DIR/plugins/properties/lib/*:$BUILD_DIR/plugins/eclipse/lib/*" com.terradatum.codestyle.CodeFormatApplication ${PROJECT_PATH}
